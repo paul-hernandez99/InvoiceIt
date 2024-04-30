@@ -1,0 +1,57 @@
+# Node.js backend ignores
+node_modules/
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+logs/
+*.log
+
+# React Native frontend ignores
+node_modules/
+ios/Pods/
+ios/*.xcworkspace
+ios/*.xcuserstate
+android/.gradle
+android/build/
+android/app/build/
+*.keystore
+*.jks
+*.p12
+*.p8
+*.plist
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+.DS_Store
+web-build/
+
+# General file ignores
+.DS_Store
+*.swp
+*.lock
+*.log
+*.tmp
+*.tmp.*
+temp/
+tmp/
+Thumbs.db
+desktop.ini
+
+# IDE specific ignores
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+*.iml
+*.ipr
+*.iws
