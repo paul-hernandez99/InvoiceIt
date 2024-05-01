@@ -9,13 +9,14 @@ import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBOx2B59WIKRa6XULQk0ZCjg9yshXTqpkE",
-  authDomain: "invoiceit-c4d60.firebaseapp.com",
-  projectId: "invoiceit-c4d60",
-  storageBucket: "invoiceit-c4d60.appspot.com",
-  messagingSenderId: "69759863027",
-  appId: "1:69759863027:web:f3c0751ad59619d71fcf86"
+  apiKey: "AIzaSyB5WjUD9gB35DYdAzeguz4Y2THmZl0z2D8",
+  authDomain: "testinghci-63c17.firebaseapp.com",
+  projectId: "testinghci-63c17",
+  storageBucket: "testinghci-63c17.appspot.com",
+  messagingSenderId: "162465841968",
+  appId: "1:162465841968:web:364c9b0ebcc9e26bdffef5"
 };
+
 
 // Initialize Firebase
 export const FIREBASE_APP = initializeApp(firebaseConfig);
