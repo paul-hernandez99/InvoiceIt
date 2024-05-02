@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const productController = require('../controllers/productController');
+const {addProduct, getAllProductsOfUser, getProductsByCodeId, addGet} = require('../controllers/productController');
 
 // Route for adding a product
-router.post('/', productController.addProduct);
+router.get('/product', addGet);
+//router.post('/product', addProduct);
 
 // Route for getting all products of a user
-router.get('/:userId', productController.getAllProductsOfUser);
+router.get('/products/:userId', getAllProductsOfUser);
 
 // Route for getting products by code_id of a user
-router.get('/:userId/:code_id', productController.getProductsByCodeId);
+router.get('/products/:userId/:code_id', getProductsByCodeId);
 
 module.exports = router;

@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, ScrollView } from 'react-native';
+import axios from '../../../axios';
+import { useUser } from '../../../UserContext';
+
 
 interface Product {
   code_id: string;
@@ -11,6 +14,9 @@ interface Product {
 }
 
 const UploadScreen = () => {
+
+  const { user } = useUser(); // Use useUser hook at the top level of the component
+  
   const [products, setProducts] = useState<Product[]>([]);
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [invoiceId, setInvoiceId] = useState<string>('');
@@ -24,11 +30,13 @@ const UploadScreen = () => {
   });
 
   const handleAddProduct = async () => {
+    const productDataWithUser = { ...productData, user: user?.email || '' }; // Access user data from the top-level hook
+    console.log('Going to save in MongoDB (USER):', user);
+    console.log('Going to save in MongoDB:', productDataWithUser);
     try {
-      // Send product data to backend
-      await axios.post('YOUR_BACKEND_URL/products/temp', productData);
+      
       // Update local state
-      setProducts([...products, productData]);
+      setProducts([...products, productDataWithUser]);
       setProductData({
         code_id: '',
         item_name: '',
@@ -37,6 +45,12 @@ const UploadScreen = () => {
         quantity: 0,
         discount: 0,
       });
+
+      // Send product data to backend
+      console.log('Going to save in MongoDB:', productDataWithUser);
+      const response = await axios.post('/product', productDataWithUser);
+      console.log('Product added in MongoDB:', response.data);
+
     } catch (error) {
       console.error('Error adding product:', error);
     }
