@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
+const productRoutes = require('./routes/ProductRoute');
 const errorHandler = require('./middlewares/errorHandler');
 const config = require('./config/config')
 
@@ -20,6 +21,7 @@ mongoose.connect(config.databaseUrl)
 
 // ROUTES
 app.use('/', userRoutes);
+app.use('/products', productRoutes);
 
 // ERROR HANDLING
 app.use(errorHandler);
