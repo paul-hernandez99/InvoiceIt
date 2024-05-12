@@ -1,43 +1,63 @@
+// productService.js
 const Product = require('../models/Product');
 
-exports.getAllProducts = async() => {
-    return await Product.find();
-};
-
-exports.addProduct = async(userId, code_id, item_name, price_per_unit, quantity, discount) => {
-  try {
-    const product = new Product({
-      user: userId,
-      code_id,
-      item_name,
-      price_per_unit,
-      quantity,
-      discount
-    });
-    await product.save();
-    return { status: 201, body: { message: 'Product created successfully', product } };
-
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
-  exports.getAllProductsOfUser = async(userId) => {
+async function addProduct(code_id, item_name, price_per_unit, quantity, discount, buyer) {
     try {
-      const products = await Product.find({ user: userId });
-      return products;
+        const product = new Product({
+            code_id,
+            item_name,
+            price_per_unit,
+            quantity,
+            discount,
+            buyer
+        });
+        const savedProduct = await product.save();
+        return { status: 201, body: savedProduct };
     } catch (error) {
-      throw new Error(error.message);
+        throw error;
     }
-  };
+}
 
-  exports.getProductsByCodeId = async(userId, code_id) => {
+async function findAllProducts() {
     try {
-      const products = await Product.find({ user: userId, code_id });
-      return products;
+        const products = await Product.find();
+        return products;
     } catch (error) {
-      throw new Error(error.message);
+        throw error;
     }
-  };
+}
 
+async function findProductById(productId) {
+    try {
+        const product = await Product.findById(productId);
+        return product;
+    } catch (error) {
+        throw error;
+    }
+}
 
+async function findProductsByUser(userId) {
+    try {
+        const products = await Product.find({ buyer: userId });
+        return products;
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function findProductsByUserAndCode(userId, codeId) {
+    try {
+        const products = await Product.find({ buyer: userId, code_id: codeId });
+        return products;
+    } catch (error) {
+        throw error;
+    }
+}
+
+module.exports = {
+    addProduct,
+    findAllProducts,
+    findProductById,
+    findProductsByUser,
+    findProductsByUserAndCode
+};

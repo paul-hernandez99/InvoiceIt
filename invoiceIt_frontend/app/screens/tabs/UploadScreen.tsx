@@ -3,79 +3,84 @@ import { View, Text, TextInput, Button, StyleSheet, ScrollView } from 'react-nat
 import axios from '../../../axios';
 import { useUser } from '../../../UserContext';
 
-
-interface Product {
-  code_id: string;
-  item_name: string;
-  date: string;
-  price_per_unit: number;
-  quantity: number;
-  discount: number;
-}
-
 const UploadScreen = () => {
 
-  const { user } = useUser(); // Use useUser hook at the top level of the component
-  
-  const [products, setProducts] = useState<Product[]>([]);
-  const [totalPrice, setTotalPrice] = useState<number>(0);
-  const [invoiceId, setInvoiceId] = useState<string>('');
-  const [productData, setProductData] = useState<Product>({
+  const { user } = useUser() || {}; // Use optional chaining to handle null value
+
+  // Define the type for productData
+  interface ProductData {
+    code_id: string;
+    item_name: string;
+    date: string;
+    price_per_unit: string;
+    quantity: string;
+    discount: string;
+  }
+
+  // Define the initial state for productData
+  const initialProductData: ProductData = {
     code_id: '',
     item_name: '',
     date: '',
-    price_per_unit: 0,
-    quantity: 0,
-    discount: 0,
-  });
+    price_per_unit: '',
+    quantity: '',
+    discount: '',
+  };
 
+  // State to store product data
+  const [productData, setProductData] = useState<ProductData>(initialProductData);
+
+  // State to store products added to the invoice
+  const [products, setProducts] = useState<ProductData[]>([]);
+
+  // Function to handle adding a product
   const handleAddProduct = async () => {
-    const productDataWithUser = { ...productData, user: user?.email || '' }; // Access user data from the top-level hook
-    console.log('Going to save in MongoDB (USER):', user);
-    console.log('Going to save in MongoDB:', productDataWithUser);
     try {
-      
-      // Update local state
-      setProducts([...products, productDataWithUser]);
-      setProductData({
-        code_id: '',
-        item_name: '',
-        date: '',
-        price_per_unit: 0,
-        quantity: 0,
-        discount: 0,
+      // Add product to local state
+      const newProduct = { ...productData };
+      setProducts([...products, newProduct]);
+
+      // Save product to database
+      await axios.post('/products', {
+        ...productData,
+        buyer: user?.email, // Use optional chaining
       });
 
-      // Send product data to backend
-      console.log('Going to save in MongoDB:', productDataWithUser);
-      const response = await axios.post('/product', productDataWithUser);
-      console.log('Product added in MongoDB:', response.data);
-
+      // Clear product data after adding
+      setProductData(initialProductData);
     } catch (error) {
       console.error('Error adding product:', error);
     }
   };
 
-  const handleCalculateTotal = () => {
-    let total = 0;
-    products.forEach(product => {
-      const price = product.price_per_unit;
-      const quantity = product.quantity;
-      const discount = product.discount;
-      total += (price * quantity) * (1 - (discount / 100));
-    });
-    setTotalPrice(total);
+  // Function to calculate total price of the invoice
+  const handleCalculateTotalInvoice = () => {
+    const totalPrice = products.reduce((total, product) => {
+      const price = parseFloat(product.price_per_unit) * parseFloat(product.quantity);
+      const discountedPrice = price - (price * parseFloat(product.discount)) / 100;
+      return total + discountedPrice;
+    }, 0);
+    return totalPrice.toFixed(2); // Fixed to 2 decimal places
   };
 
-  const handleSaveInvoice = () => {
-    // Send request to backend to save products and invoice
-    const invoiceData = {
-      invoiceId: invoiceId, // You need to set invoiceId when it's available
-      products: products,
-      totalPrice: totalPrice,
-    };
-    console.log('Saving invoice:', invoiceData);
-    // Implement logic to send request to backend to save invoice
+  // Function to handle saving the invoice
+  const handleSaveInvoice = async () => {
+    try {
+      // Calculate total amount for the invoice
+      const totalAmount = handleCalculateTotalInvoice();
+
+      // Create invoice in the database
+      await axios.post('/invoices', {
+        user: user?.email, // Use optional chaining
+        products: products.map(product => product.code_id),
+        totalAmount,
+      });
+
+      // Clear products after saving invoice
+      setProducts([]);
+    } catch (error) {
+      console.error('Error saving invoice:', error);
+    }
   };
 
   return (
@@ -86,46 +91,45 @@ const UploadScreen = () => {
           style={styles.input}
           placeholder="Code ID"
           value={productData.code_id}
-          onChangeText={value => setProductData({ ...productData, code_id: value })}
+          onChangeText={value => setProductData({...productData, code_id: value })}
         />
         <TextInput
           style={styles.input}
           placeholder="Item Name"
           value={productData.item_name}
-          onChangeText={value => setProductData({ ...productData, item_name: value })}
+          onChangeText={value => setProductData({...productData, item_name: value })}
         />
         <TextInput
           style={styles.input}
           placeholder="Date"
           value={productData.date}
-          onChangeText={value => setProductData({ ...productData, date: value })}
+          onChangeText={value => setProductData({...productData, date: value })}
         />
         <TextInput
           style={styles.input}
           placeholder="Price Per Unit"
-          value={productData.price_per_unit.toString()}
-          onChangeText={value => setProductData({ ...productData, price_per_unit: parseFloat(value) })}
+          value={productData.price_per_unit}
+          onChangeText={value => setProductData({...productData, price_per_unit: value })}
           keyboardType="numeric"
         />
         <TextInput
           style={styles.input}
           placeholder="Quantity"
-          value={productData.quantity.toString()}
-          onChangeText={value => setProductData({ ...productData, quantity: parseFloat(value) })}
+          value={productData.quantity}
+          onChangeText={value => setProductData({...productData, quantity: value })}
           keyboardType="numeric"
         />
         <TextInput
           style={styles.input}
           placeholder="Discount (%)"
-          value={productData.discount.toString()}
-          onChangeText={value => setProductData({ ...productData, discount: parseFloat(value) })}
+          value={productData.discount}
+          onChangeText={value => setProductData({...productData, discount: value })}
           keyboardType="numeric"
         />
         <Button title="Add Product" onPress={handleAddProduct} />
       </View>
       <View style={styles.totalContainer}>
-        <Text style={styles.totalText}>Total Price: {totalPrice}</Text>
-        <Button title="Calculate Total" onPress={handleCalculateTotal} />
+        <Text style={styles.totalText}>Total Price: {handleCalculateTotalInvoice()}</Text>
         <Button title="Save Invoice" onPress={handleSaveInvoice} />
       </View>
       {/* Display added products */}
