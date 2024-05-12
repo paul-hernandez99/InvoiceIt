@@ -41,7 +41,7 @@ const UploadScreen = () => {
       setProducts([...products, newProduct]);
 
       // Save product to database
-      await axios.post('/products', {
+      await axios.post('/product', {
         ...productData,
         buyer: user?.email, // Use optional chaining
       });

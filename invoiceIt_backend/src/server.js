@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
+const invoiceRoutes = require('./routes/invoiceRoutes');
 const errorHandler = require('./middlewares/errorHandler');
 const config = require('./config/config')
 
@@ -22,7 +23,7 @@ mongoose.connect(config.databaseUrl)
 // ROUTES
 app.use('/', userRoutes);
 app.use('/', productRoutes);
-
+app.use('/', invoiceRoutes);
 // ERROR HANDLING
 app.use(errorHandler);
 
