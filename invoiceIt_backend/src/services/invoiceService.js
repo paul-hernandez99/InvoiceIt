@@ -6,7 +6,6 @@ const Product = require('../models/Product');
 
 exports.createInvoice = async (userId, products, totalAmount) => {
     try {
-
         const user = await User.findOne({ email: userId });
         
         if (!user) {
@@ -38,7 +37,8 @@ exports.createInvoice = async (userId, products, totalAmount) => {
 
 exports.findAllInvoices = async () => {
     try {
-        const invoices = await Invoice.find();
+        const invoices = await Invoice.find()
+        .populate('products');
         return invoices;
     } catch (error) {
         throw error;

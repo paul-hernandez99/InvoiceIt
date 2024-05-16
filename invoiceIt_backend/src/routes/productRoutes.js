@@ -4,9 +4,9 @@ const router = express.Router();
 const { createProduct, getAllProducts, getProduct, getProductsByUser, getProductsByUserAndCode } = require('../controllers/productController');
 
 router.post('/product', createProduct);
-router.get('/product', getAllProducts);
-router.get('/user/:userId', getProductsByUser);
-router.get('/user/:userId/code/:codeId', getProductsByUserAndCode);
-router.get('/:productId', getProduct);
+router.get('/products', getAllProducts);
+router.get('/products/user/:userId', getProductsByUser);
+router.get('/products/user/:userId/code/:codeId', getProductsByUserAndCode);
+router.get('/products/:productId', getProduct);
 
 module.exports = router;

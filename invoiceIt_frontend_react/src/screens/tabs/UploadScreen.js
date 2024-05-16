@@ -59,7 +59,7 @@ const UploadScreen = () => {
             const totalAmount = handleCalculateTotalInvoice();
 
             // Create invoice in the database
-            await axios.post('/invoices', {
+            await axios.post('/invoice', {
             user: currentUser?.email, // Use optional chaining
             products: products.map(product => product.code_id),
             totalAmount,
