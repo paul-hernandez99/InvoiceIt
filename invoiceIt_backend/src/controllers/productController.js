@@ -32,8 +32,8 @@ exports.getProduct = async (req, res, next) => {
 
 exports.getProductsByUser = async (req, res, next) => {
     try {
-        const userId = req.params.userId;
-        const products = await productService.findProductsByUser(userId);
+        const userEmail = req.params.userId; // assuming userId parameter contains the user's email
+        const products = await productService.findProductsByUser(userEmail);
         res.status(200).json(products);
     } catch (error) {
         next(error);

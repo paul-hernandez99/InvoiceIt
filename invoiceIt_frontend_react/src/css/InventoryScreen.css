@@ -1,0 +1,29 @@
+/* InventoryScreen.css */
+.container {
+    margin-top: 50px;
+}
+
+.table {
+    margin-top: 20px;
+}
+
+.table th, .table td {
+    vertical-align: middle;
+    text-align: center;
+}
+
+.table thead th {
+    background-color: #343a40;
+    color: #fff;
+}
+
+.text-center {
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+.alert {
+    margin: 20px auto;
+    width: 50%;
+    text-align: center;
+}

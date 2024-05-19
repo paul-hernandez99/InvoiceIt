@@ -51,18 +51,28 @@ exports.findProductById = async (productId) =>  {
     }
 };
 
-exports.findProductsByUser = async (userId) =>  {
+exports.findProductsByUser = async (userEmail) => {
     try {
-        const products = await Product.find({ buyer: userId });
+        // Find the user by email to get their ObjectId
+        const user = await User.findOne({ email: userEmail });
+
+        // If user is not found, return an empty array or handle the case accordingly
+        if (!user) {
+            return [];
+        }
+
+        // Use the user's ObjectId to find the products
+        const products = await Product.find({ buyer: user._id });
         return products;
     } catch (error) {
         throw error;
     }
 };
-
 exports.findProductsByUserAndCode = async (userId, codeId) =>  {
     try {
-        const products = await Product.find({ buyer: userId, code_id: codeId });
+        const user = await User.findOne({ email: userId });
+
+        const products = await Product.find({ buyer: user._id, code_id: codeId });
         return products;
     } catch (error) {
         throw error;

@@ -8,5 +8,4 @@ router.get('/invoices', getAllInvoices);
 router.get('/invoices/:invoiceId', getInvoice);
 router.get('/invoices/users/:userId', getInvoicesByUser);
 
-
 module.exports = router;
