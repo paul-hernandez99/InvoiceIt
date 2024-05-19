@@ -30,43 +30,47 @@ const InventoryScreen = () => {
     }, [currentUser]);
 
     const handleFetchChartData = async () => {
-        try {
-            const response = await axios.get(`/products/user/${currentUser?.email}/code/${selectedProduct}`);
-            const productPurchases = response.data;
-
-            let filteredPurchases;
-            const now = new Date();
-
-            if (timeRange === 'lastMonth') {
-                filteredPurchases = productPurchases.filter(purchase => {
-                    const purchaseDate = new Date(purchase.date);
-                    return purchaseDate >= new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-                });
-            } else if (timeRange === 'lastYear') {
-                filteredPurchases = productPurchases.filter(purchase => {
-                    const purchaseDate = new Date(purchase.date);
-                    return purchaseDate >= new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-                });
-            } else {
-                filteredPurchases = productPurchases;
-            }
-
-            const data = {
-                labels: filteredPurchases.map(purchase => new Date(purchase.date).toLocaleDateString()),
-                datasets: [{
-                    label: 'Price per Unit',
-                    data: filteredPurchases.map(purchase => purchase.price_per_unit),
-                    fill: false,
-                    backgroundColor: 'rgb(75, 192, 192)',
-                    borderColor: 'rgba(75, 192, 192, 0.2)',
-                }],
-            };
-
-            setChartData(data);
-        } catch (error) {
-            setError('Error fetching chart data: ' + error.message);
-        }
-    };
+      try {
+          const response = await axios.get(`/products/user/${currentUser?.email}/code/${selectedProduct}`);
+          const productPurchases = response.data;
+  
+          let filteredPurchases;
+          const now = new Date();
+  
+          if (timeRange === 'lastMonth') {
+              filteredPurchases = productPurchases.filter(purchase => {
+                  const purchaseDate = new Date(purchase.date);
+                  return purchaseDate >= new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+              });
+          } else if (timeRange === 'lastYear') {
+              filteredPurchases = productPurchases.filter(purchase => {
+                  const purchaseDate = new Date(purchase.date);
+                  return purchaseDate >= new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+              });
+          } else {
+              filteredPurchases = productPurchases;
+          }
+  
+          // Reverse the arrays for labels and data
+          const reversedLabels = filteredPurchases.map(purchase => new Date(purchase.date).toLocaleDateString()).reverse();
+          const reversedData = filteredPurchases.map(purchase => purchase.price_per_unit).reverse();
+  
+          const data = {
+              labels: reversedLabels,
+              datasets: [{
+                  label: 'Price per Unit',
+                  data: reversedData,
+                  fill: false,
+                  backgroundColor: 'rgb(75, 192, 192)',
+                  borderColor: 'rgba(75, 192, 192, 0.2)',
+              }],
+          };
+  
+          setChartData(data);
+      } catch (error) {
+          setError('Error fetching chart data: ' + error.message);
+      }
+  };
 
     useEffect(() => {
         if (selectedProduct) {
