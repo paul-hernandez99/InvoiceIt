@@ -19,6 +19,7 @@ function DrawerNavigation() {
     { icon: <HomeIcon />, label: 'Home', path: '/' },
     { icon: <StorageIcon />, label: 'Inventory', path: '/inventory' },
     { icon: <CloudUploadIcon />, label: 'Upload', path: '/upload' },
+    { icon: <CloudUploadIcon />, label: 'Upload_auto', path: '/upload_auto' },
     { icon: <AccountCircleIcon />, label: 'Profile', path: '/profile' }
     //{ icon: <SettingsIcon />, label: 'Settings', path: '/settings' }
   ];

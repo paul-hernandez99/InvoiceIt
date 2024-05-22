@@ -12,6 +12,7 @@ import HomeScreen  from './screens/tabs/HomeScreen';
 import InventoryScreen from './screens/tabs/InventoryScreen';
 import UploadScreen from './screens/tabs/UploadScreen';
 import ProfileScreen from './screens/tabs/ProfileScreen';
+import UploadScreenAuto from './screens/tabs/UploadScreenAuto';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
             <Route index element={<HomeScreen />} />
             <Route path='inventory' element={<InventoryScreen />} />
             <Route path='upload' element={<UploadScreen />} />
+            <Route path='upload_auto' element={<UploadScreenAuto />} />
             <Route path='profile' element={<ProfileScreen />} />
           </Route>
         </Routes>

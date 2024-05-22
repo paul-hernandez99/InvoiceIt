@@ -1,5 +1,4 @@
-# Specify the base image
-FROM node:20.11-alpine
+FROM node:16
 
 # Set the working directory inside the container
 WORKDIR /usr/src/app
@@ -11,6 +10,21 @@ COPY package*.json ./
 RUN npm install
 
 RUN npm install -g nodemon
+
+# Install Python and other dependencies
+RUN apt-get update && apt-get install -y \
+  python3 \
+  python3-pip \
+  build-essential \
+  libcairo2-dev \
+  libpango1.0-dev \
+  libjpeg-dev \
+  libgif-dev \
+  librsvg2-dev \
+  poppler-utils
+
+# Install Python packages
+RUN pip3 install pdf2image
 
 # Bundle app source inside Docker image
 COPY . .
