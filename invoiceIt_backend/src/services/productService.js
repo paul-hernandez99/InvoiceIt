@@ -2,7 +2,7 @@
 const Product = require('../models/Product');
 const User = require('../models/User');
 
-exports.addProduct = async (code_id, item_name, date, price_per_unit, quantity, discount, buyerEmail) => {
+exports.addProduct = async (code_id, item_name, date, price_per_unit, quantity, discount, buyerEmail, transactionType) => {
     try {
         const user = await User.findOne({ email: buyerEmail });
 
@@ -17,6 +17,7 @@ exports.addProduct = async (code_id, item_name, date, price_per_unit, quantity, 
             price_per_unit,
             quantity,
             discount,
+            transactionType, // Include transactionType
             buyer: user._id
         });
 

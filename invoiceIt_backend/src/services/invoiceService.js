@@ -4,7 +4,7 @@ const User = require('../models/User');
 const Product = require('../models/Product');
 
 
-exports.createInvoice = async (userId, products, totalAmount) => {
+exports.createInvoice = async (userId, products, totalAmount, invoiceType) => {
     try {
         const user = await User.findOne({ email: userId });
         
@@ -25,15 +25,17 @@ exports.createInvoice = async (userId, products, totalAmount) => {
         const invoice = new Invoice({
             user: user._id,
             products: validProductObjectIds, // Use the ObjectId array
-            totalAmount
+            totalAmount,
+            invoiceType, // Include invoiceType
         });
-        
+
         const savedInvoice = await invoice.save();
         return { status: 201, body: savedInvoice };
     } catch (error) {
         throw error;
     }
 };
+
 
 exports.findAllInvoices = async () => {
     try {
@@ -56,7 +58,8 @@ exports.findInvoiceById = async (invoiceId) => {
 
 exports.findInvoicesByUser = async (userId) => {
     try {
-        const invoices = await Invoice.find({ user: userId });
+        const user = await User.findOne({ email: userId });
+        const invoices = await Invoice.find({ user: user._id });
         return invoices;
     } catch (error) {
         throw error;

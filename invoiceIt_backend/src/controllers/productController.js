@@ -3,8 +3,8 @@ const productService = require('../services/productService');
 
 exports.createProduct = async (req, res, next) => {
     try {
-        const { code_id, item_name, date, price_per_unit, quantity, discount, buyer } = req.body; // Ensure date is included
-        const product = await productService.addProduct(code_id, item_name, date, price_per_unit, quantity, discount, buyer);
+        const { code_id, item_name, date, price_per_unit, quantity, discount, buyer, transactionType } = req.body;
+        const product = await productService.addProduct(code_id, item_name, date, price_per_unit, quantity, discount, buyer, transactionType);
         res.status(product.status).json(product.body);
     } catch (error) {
         next(error);

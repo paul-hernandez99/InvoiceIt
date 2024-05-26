@@ -8,7 +8,7 @@ const productSchema = new mongoose.Schema({
     price_per_unit: { type: Number, required: true },
     quantity: { type: Number, required: true },
     discount: { type: Number, default: 0 },
-    // Add a reference to the User model
+    transactionType: { type: String, enum: ['buy', 'sell'], required: true }, // New field
     buyer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 });
 

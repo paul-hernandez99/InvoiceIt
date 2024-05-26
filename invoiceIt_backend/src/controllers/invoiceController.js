@@ -3,8 +3,8 @@ const invoiceService = require('../services/invoiceService');
 
 exports.createInvoice = async (req, res, next) => {
     try {
-        const { user, products, totalAmount } = req.body;
-        const invoice = await invoiceService.createInvoice(user, products, totalAmount);
+        const { user, products, totalAmount, invoiceType } = req.body;
+        const invoice = await invoiceService.createInvoice(user, products, totalAmount, invoiceType);
         res.status(invoice.status).json(invoice.body);
     } catch (error) {
         next(error);
