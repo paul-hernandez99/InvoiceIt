@@ -35,6 +35,33 @@ exports.createInvoice = async (userId, products, totalAmount, date) => { // Adde
     }
 };
 
+exports.findInvoicesByUser = async (userId) => {
+    try {
+        const user = await User.findOne({ email: userId });
+        const invoices = await Invoice.find({ user: user._id });
+        return invoices;
+    } catch (error) {
+        throw error;
+    }
+};
+
+exports.findInvoicesByUserAndDateRange = async (userId, startDate, endDate) => {
+    try {
+        const user = await User.findOne({ email: userId });
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        const invoices = await Invoice.find({
+            user: user._id,
+            date: { $gte: startDate, $lte: endDate }
+        });
+        return invoices;
+    } catch (error) {
+        throw error;
+    }
+};
+
 exports.findAllInvoices = async () => {
     try {
         const invoices = await Invoice.find()
@@ -54,13 +81,5 @@ exports.findInvoiceById = async (invoiceId) => {
     }
 };
 
-exports.findInvoicesByUser = async (userId) => {
-    try {
-        const user = await User.findOne({ email: userId });
-        const invoices = await Invoice.find({ user: user._id });
-        return invoices;
-    } catch (error) {
-        throw error;
-    }
-};
+
 

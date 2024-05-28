@@ -2,171 +2,161 @@ import React, { useState, useEffect } from 'react';
 import axios from '../../axios';
 import { useAuth } from '../../AuthContext';
 import { Line } from 'react-chartjs-2';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 import 'chart.js/auto';
-import '../../css/HomeScreen.css';
 
 const HomeScreen = () => {
     const { currentUser } = useAuth();
-    const [totalMoneySpent, setTotalMoneySpent] = useState(0);
-    const [totalProductsBought, setTotalProductsBought] = useState(0);
-    const [totalInvoices, setTotalInvoices] = useState(0);
+    const [invoices, setInvoices] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
     const [chartData, setChartData] = useState(null);
-    const [timeRange, setTimeRange] = useState('custom');
-    const [startDate, setStartDate] = useState(new Date(new Date().setMonth(new Date().getMonth() - 1)));
-    const [endDate, setEndDate] = useState(new Date());
 
     useEffect(() => {
-        if (currentUser) {
-            fetchMetrics();
-        }
-    }, [currentUser, timeRange, startDate, endDate]);
-
-    const fetchMetrics = async () => {
-        try {
-            const [invoicesRes, productsRes] = await Promise.all([
-                axios.get(`/invoices/users/${currentUser?.email}`),
-                axios.get(`/products/user/${currentUser?.email}`)
-            ]);
-
-            const invoices = invoicesRes.data;
-            const products = productsRes.data;
-
-            const filteredInvoices = filterByDateRange(invoices);
-            const filteredProducts = filterByDateRange(products);
-
-            setTotalMoneySpent(filteredInvoices.reduce((sum, invoice) => sum + invoice.totalAmount, 0));
-            setTotalProductsBought(filteredProducts.reduce((sum, product) => sum + product.quantity, 0));
-            setTotalInvoices(filteredInvoices.length);
-
-            generateChartData(filteredInvoices);
-        } catch (error) {
-            console.error('Error fetching metrics:', error.message);
-        }
-    };
-
-    const filterByDateRange = (items) => {
-        const now = new Date();
-        return items.filter(item => {
-            const itemDate = new Date(item.date || item.createdAt);
-            if (timeRange === 'lastMonth') {
-                return itemDate >= new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-            } else if (timeRange === 'lastYear') {
-                return itemDate >= new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-            } else {
-                return itemDate >= startDate && itemDate <= endDate;
+        const fetchInvoices = async () => {
+            try {
+                const response = await axios.get(`/invoices/users/${currentUser?.email}`);
+                setInvoices(response.data);
+            } catch (err) {
+                setError('Error fetching invoices: ' + err.message);
+            } finally {
+                setLoading(false);
             }
-        });
-    };
+        };
 
-    const generateChartData = (filteredInvoices) => {
-        const dataMap = new Map();
+        fetchInvoices();
+    }, [currentUser]);
+
+    useEffect(() => {
+        if (invoices.length > 0) {
+            if (selectedMonth) {
+                const filteredInvoices = invoices.filter(invoice => {
+                    const invoiceDate = new Date(invoice.date);
+                    return (
+                        invoiceDate.getFullYear() === selectedYear &&
+                        invoiceDate.getMonth() + 1 === selectedMonth
+                    );
+                });
+                generateMonthlyChartData(filteredInvoices);
+            } else {
+                const filteredInvoices = invoices.filter(invoice => {
+                    const invoiceDate = new Date(invoice.date);
+                    return invoiceDate.getFullYear() === selectedYear;
+                });
+                generateYearlyChartData(filteredInvoices);
+            }
+        }
+    }, [invoices, selectedYear, selectedMonth]);
+
+    const generateYearlyChartData = (filteredInvoices) => {
+        const monthlyTotalAmounts = new Array(12).fill(0);
 
         filteredInvoices.forEach(invoice => {
-            const date = new Date(invoice.createdAt);
-            const key = timeRange === 'lastYear' || timeRange === 'custom' && endDate.getFullYear() - startDate.getFullYear() > 1
-                ? `${date.getFullYear()}-${date.getMonth() + 1}`
-                : date.toLocaleDateString();
-
-            if (!dataMap.has(key)) {
-                dataMap.set(key, 0);
-            }
-            dataMap.set(key, dataMap.get(key) + invoice.totalAmount);
+            const invoiceDate = new Date(invoice.date);
+            const month = invoiceDate.getMonth();
+            monthlyTotalAmounts[month] += invoice.totalAmount;
         });
 
-        const labels = Array.from(dataMap.keys()).sort();
-        const data = labels.map(label => dataMap.get(label));
-
-        setChartData({
-            labels,
+        const data = {
+            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
             datasets: [{
-                label: 'Money Spent',
-                data,
+                label: `Total Amount Expended in ${selectedYear}`,
+                data: monthlyTotalAmounts,
                 fill: false,
                 backgroundColor: 'rgb(75, 192, 192)',
                 borderColor: 'rgba(75, 192, 192, 0.2)',
             }],
-        });
+        };
+
+        setChartData(data);
     };
+
+    const generateMonthlyChartData = (filteredInvoices) => {
+        const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+        const dailyTotalAmounts = new Array(daysInMonth).fill(0);
+
+        filteredInvoices.forEach(invoice => {
+            const invoiceDate = new Date(invoice.date);
+            const day = invoiceDate.getDate() - 1;
+            dailyTotalAmounts[day] += invoice.totalAmount;
+        });
+
+        const data = {
+            labels: Array.from({ length: daysInMonth }, (_, i) => i + 1),
+            datasets: [{
+                label: `Total Amount Expended in ${getMonthName(selectedMonth)}, ${selectedYear}`,
+                data: dailyTotalAmounts,
+                fill: false,
+                backgroundColor: 'rgb(75, 192, 192)',
+                borderColor: 'rgba(75, 192, 192, 0.2)',
+            }],
+        };
+
+        setChartData(data);
+    };
+
+    const getMonthName = (month) => {
+        const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        return months[month - 1];
+    };
+
+    if (loading) {
+        return <div className="text-center mt-5">Loading...</div>;
+    }
+
+    if (error) {
+        return <div className="alert alert-danger mt-5">{error}</div>;
+    }
 
     return (
         <div className="container mt-5">
-            <h1 className="mb-4 text-center">Home Dashboard</h1>
-            <div className="row mb-4">
-                <div className="col-md-4">
-                    <div className="card shadow-sm">
-                        <div className="card-body">
-                            <h5>Total Money Spent</h5>
-                            <p className="card-text">${totalMoneySpent.toFixed(2)}</p>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-4">
-                    <div className="card shadow-sm">
-                        <div className="card-body">
-                            <h5>Total Products Bought</h5>
-                            <p className="card-text">{totalProductsBought}</p>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-4">
-                    <div className="card shadow-sm">
-                        <div className="card-body">
-                            <h5>Total Invoices</h5>
-                            <p className="card-text">{totalInvoices}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <h1 className="mb-4 text-center">Home Screen</h1>
+
             <div className="card mb-4 shadow-sm">
                 <div className="card-body">
                     <div className="form-group">
-                        <label htmlFor="timeRangeSelect"><strong>Select Time Range:</strong></label>
+                        <label htmlFor="yearSelect"><strong>Select Year:</strong></label>
                         <select
-                            id="timeRangeSelect"
+                            id="yearSelect"
                             className="form-control"
-                            value={timeRange}
-                            onChange={e => setTimeRange(e.target.value)}
+                            value={selectedYear}
+                            onChange={e => setSelectedYear(parseInt(e.target.value))}
                         >
-                            <option value="lastMonth">Last Month</option>
-                            <option value="lastYear">Last Year</option>
-                            <option value="custom">Custom</option>
+                            {Array.from(new Set(invoices.map(invoice => new Date(invoice.date).getFullYear()))).map(year => (
+                                <option key={year} value={year}>{year}</option>
+                            ))}
                         </select>
                     </div>
-                    {timeRange === 'custom' && (
-                        <div className="form-group">
-                            <label><strong>Select Date Range:</strong></label>
-                            <div className="d-flex">
-                                <DatePicker
-                                    selected={startDate}
-                                    onChange={(date) => setStartDate(date)}
-                                    selectsStart
-                                    startDate={startDate}
-                                    endDate={endDate}
-                                    className="form-control mr-2"
-                                />
-                                <DatePicker
-                                    selected={endDate}
-                                    onChange={(date) => setEndDate(date)}
-                                    selectsEnd
-                                    startDate={startDate}
-                                    endDate={endDate}
-                                    className="form-control"
-                                />
-                            </div>
+                    <div className="form-group">
+                        <label htmlFor="monthSelect"><strong>Select Month:</strong></label>
+                        <select
+                            id="monthSelect"
+                            className="form-control"
+                            value={selectedMonth}
+                            onChange={e => setSelectedMonth(parseInt(e.target.value))}
+                        >
+                            <option value="">All Months</option>
+                            {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+                                <option key={month} value={month}>{getMonthName(month)}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div className="card mb-4 shadow-sm">
+                <div className="card-body">
+                    {chartData && (
+                        <div className="mt-4">
+                            <Line data={chartData} />
                         </div>
                     )}
                 </div>
             </div>
-            {chartData && (
-                <div className="card mb-4 shadow-sm">
-                    <div className="card-body">
-                        <h2>Money Spent Over Time</h2>
-                        <Line data={chartData} />
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

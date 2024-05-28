@@ -11,6 +11,26 @@ exports.createInvoice = async (req, res, next) => {
     }
 };
 
+exports.getInvoicesByUser = async (req, res, next) => {
+    try {
+        const userId = req.params.userId;
+        const invoices = await invoiceService.findInvoicesByUser(userId);
+        res.status(200).json(invoices);
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getInvoicesByUserAndDateRange = async (req, res, next) => {
+    try {
+        const userId = req.params.userId;
+        const { startDate, endDate } = req.query;
+        const invoices = await invoiceService.findInvoicesByUserAndDateRange(userId, startDate, endDate);
+        res.status(200).json(invoices);
+    } catch (error) {
+        next(error);
+    }
+};
 
 exports.getAllInvoices = async (req, res, next) => {
     try {
@@ -31,12 +51,3 @@ exports.getInvoice = async (req, res, next) => {
     }
 };
 
-exports.getInvoicesByUser = async (req, res, next) => {
-    try {
-        const userId = req.params.userId;
-        const invoices = await invoiceService.findInvoicesByUser(userId);
-        res.status(200).json(invoices);
-    } catch (error) {
-        next(error);
-    }
-};
