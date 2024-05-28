@@ -1,7 +1,7 @@
 // invoiceRoutes.js
 const express = require('express');
 const router = express.Router();
-const { createInvoice, getAllInvoices, getInvoice, getInvoicesByUser } = require('../controllers/invoiceController')
+const { createInvoice, getAllInvoices, getInvoice, getInvoicesByUser } = require('../controllers/invoiceController');
 
 router.post('/invoice', createInvoice);
 router.get('/invoices', getAllInvoices);

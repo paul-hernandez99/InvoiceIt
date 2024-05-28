@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from '../../axios';
 import { useAuth } from '../../AuthContext';
 import { Line } from 'react-chartjs-2';
@@ -35,7 +35,7 @@ const InventoryScreen = () => {
         fetchProducts();
     }, [currentUser]);
 
-    const handleFetchChartData = async () => {
+    const handleFetchChartData = useCallback(async () => {
         try {
             const response = await axios.get(`/products/user/${currentUser?.email}/code/${selectedProduct}`);
             const productPurchases = response.data;
@@ -92,9 +92,9 @@ const InventoryScreen = () => {
         } catch (error) {
             setError('Error fetching chart data: ' + error.message);
         }
-    };
+    }, [currentUser?.email, selectedProduct, timeRange, startDate, endDate]);
 
-    const handleFetchQuantityChartData = (filteredPurchases) => {
+    const handleFetchQuantityChartData = useCallback((filteredPurchases) => {
         const monthlyData = new Array(12).fill(0);
 
         filteredPurchases.forEach(purchase => {
@@ -119,7 +119,7 @@ const InventoryScreen = () => {
         };
 
         setQuantityChartData(quantityData);
-    };
+    }, [selectedYear]);
 
     useEffect(() => {
         if (selectedProduct) {
@@ -134,7 +134,7 @@ const InventoryScreen = () => {
                     setError('Error fetching quantity chart data: ' + error.message);
                 });
         }
-    }, [selectedProduct, selectedYear]);
+    }, [selectedProduct, selectedYear, currentUser?.email, handleFetchChartData, handleFetchQuantityChartData]);
 
     const getUniqueProducts = () => {
         const uniqueProducts = [];

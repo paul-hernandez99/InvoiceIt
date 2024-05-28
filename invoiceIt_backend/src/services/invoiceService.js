@@ -3,8 +3,7 @@ const Invoice = require('../models/Invoice');
 const User = require('../models/User');
 const Product = require('../models/Product');
 
-
-exports.createInvoice = async (userId, products, totalAmount, invoiceType) => {
+exports.createInvoice = async (userId, products, totalAmount, date) => { // Added date parameter
     try {
         const user = await User.findOne({ email: userId });
         
@@ -26,7 +25,7 @@ exports.createInvoice = async (userId, products, totalAmount, invoiceType) => {
             user: user._id,
             products: validProductObjectIds, // Use the ObjectId array
             totalAmount,
-            invoiceType, // Include invoiceType
+            date // Include the date
         });
 
         const savedInvoice = await invoice.save();
@@ -35,7 +34,6 @@ exports.createInvoice = async (userId, products, totalAmount, invoiceType) => {
         throw error;
     }
 };
-
 
 exports.findAllInvoices = async () => {
     try {

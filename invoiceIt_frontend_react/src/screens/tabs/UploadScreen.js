@@ -1,7 +1,7 @@
+// UploadScreen.js
 import React, { useState } from 'react';
 import axios from '../../axios';
 import { useAuth } from '../../AuthContext';
-
 
 const initialProductData = {
     code_id: '',
@@ -22,7 +22,10 @@ const UploadScreen = () => {
     // State to store products added to the invoice
     const [products, setProducts] = useState([]);
 
-      // Function to handle adding a product
+    // State to store invoice date
+    const [invoiceDate, setInvoiceDate] = useState('');
+
+    // Function to handle adding a product
     const handleAddProduct = async () => {
         try {
             // Add product to local state
@@ -31,8 +34,8 @@ const UploadScreen = () => {
 
             // Save product to database
             await axios.post('/product', {
-            ...productData,
-            buyer: currentUser?.email, // Use optional chaining
+                ...productData,
+                buyer: currentUser?.email, // Use optional chaining
             });
 
             // Clear product data after adding
@@ -60,13 +63,15 @@ const UploadScreen = () => {
 
             // Create invoice in the database
             await axios.post('/invoice', {
-            user: currentUser?.email, // Use optional chaining
-            products: products.map(product => product.code_id),
-            totalAmount,
+                user: currentUser?.email, // Use optional chaining
+                products: products.map(product => product.code_id),
+                totalAmount,
+                date: invoiceDate, // Include the invoice date
             });
 
-            // Clear products after saving invoice
+            // Clear products and invoice date after saving invoice
             setProducts([]);
+            setInvoiceDate('');
         } catch (error) {
             console.error('Error saving invoice:', error);
         }
@@ -108,6 +113,14 @@ const UploadScreen = () => {
               onChange={e => setProductData({...productData, discount: e.target.value})}
             />
             <button onClick={handleAddProduct}>Add Product</button>
+          </div>
+          <div className="invoice-date-container">
+            <input
+              type="date"
+              placeholder="Invoice Date"
+              value={invoiceDate}
+              onChange={e => setInvoiceDate(e.target.value)}
+            />
           </div>
           <div className="total-container">
             <p>Total Price: {handleCalculateTotalInvoice()}</p>
