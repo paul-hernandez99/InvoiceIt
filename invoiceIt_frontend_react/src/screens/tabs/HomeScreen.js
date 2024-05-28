@@ -12,6 +12,7 @@ const HomeScreen = () => {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
     const [chartData, setChartData] = useState(null);
+    const [invoiceCount, setInvoiceCount] = useState(0);
 
     useEffect(() => {
         const fetchInvoices = async () => {
@@ -39,12 +40,14 @@ const HomeScreen = () => {
                     );
                 });
                 generateMonthlyChartData(filteredInvoices);
+                setInvoiceCount(filteredInvoices.length);
             } else {
                 const filteredInvoices = invoices.filter(invoice => {
                     const invoiceDate = new Date(invoice.date);
                     return invoiceDate.getFullYear() === selectedYear;
                 });
                 generateYearlyChartData(filteredInvoices);
+                setInvoiceCount(filteredInvoices.length);
             }
         }
     }, [invoices, selectedYear, selectedMonth]);
@@ -148,13 +151,25 @@ const HomeScreen = () => {
                 </div>
             </div>
 
-            <div className="card mb-4 shadow-sm">
-                <div className="card-body">
-                    {chartData && (
-                        <div className="mt-4">
-                            <Line data={chartData} />
+            <div className="row">
+                <div className="col-md-6">
+                    <div className="card mb-4 shadow-sm">
+                        <div className="card-body">
+                            <h5 className="card-title">Invoice Count</h5>
+                            <p className="card-text">{invoiceCount}</p>
                         </div>
-                    )}
+                    </div>
+                </div>
+                <div className="col-md-6">
+                    <div className="card mb-4 shadow-sm">
+                        <div className="card-body">
+                            {chartData && (
+                                <div className="mt-4">
+                                    <Line data={chartData} />
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
