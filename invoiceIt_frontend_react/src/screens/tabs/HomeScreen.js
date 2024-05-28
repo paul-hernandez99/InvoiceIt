@@ -13,12 +13,29 @@ const HomeScreen = () => {
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
     const [chartData, setChartData] = useState(null);
     const [invoiceCount, setInvoiceCount] = useState(0);
+    const [productCount, setProductCount] = useState(0); // New state for product count
+    const [startDate, setStartDate] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1)); // Start date for time range
+    const [endDate, setEndDate] = useState(new Date()); // End date for time range
+    const [productPurchases, setProductPurchases] = useState([]);
+
+    
+    const calculateProductCount = (filteredProductPurchases) => {
+        let totalCount = 0;
+        filteredProductPurchases.forEach(purchase => {
+            totalCount += purchase.quantity;
+        });
+        setProductCount(totalCount);
+    };
+
 
     useEffect(() => {
         const fetchInvoices = async () => {
             try {
                 const response = await axios.get(`/invoices/users/${currentUser?.email}`);
                 setInvoices(response.data);
+                const response_products = await axios.get(`/products/user/${currentUser?.email}`);
+                setProductPurchases(response_products.data);
+
             } catch (err) {
                 setError('Error fetching invoices: ' + err.message);
             } finally {
@@ -39,6 +56,16 @@ const HomeScreen = () => {
                         invoiceDate.getMonth() + 1 === selectedMonth
                     );
                 });
+    
+                const filteredProductPurchases = productPurchases.filter(purchase => {
+                    const purchaseDate = new Date(purchase.date);
+                    return (
+                        purchaseDate.getFullYear() === selectedYear &&
+                        purchaseDate.getMonth() + 1 === selectedMonth
+                    );
+                });
+    
+                calculateProductCount(filteredProductPurchases);
                 generateMonthlyChartData(filteredInvoices);
                 setInvoiceCount(filteredInvoices.length);
             } else {
@@ -46,11 +73,38 @@ const HomeScreen = () => {
                     const invoiceDate = new Date(invoice.date);
                     return invoiceDate.getFullYear() === selectedYear;
                 });
+    
+                const filteredProductPurchases = productPurchases.filter(purchase => {
+                    const purchaseDate = new Date(purchase.date);
+                    return purchaseDate.getFullYear() === selectedYear;
+                });
+    
+                calculateProductCount(filteredProductPurchases);
                 generateYearlyChartData(filteredInvoices);
                 setInvoiceCount(filteredInvoices.length);
             }
         }
     }, [invoices, selectedYear, selectedMonth]);
+
+    useEffect(() => {
+        if (invoices.length > 0) {
+            // Filter invoices based on selected time range
+            const filteredInvoices = invoices.filter(invoice => {
+                const invoiceDate = new Date(invoice.date);
+                return (
+                    invoiceDate >= startDate && invoiceDate <= endDate
+                );
+            });
+            // Calculate the total count of products bought within the selected time range
+            let totalCount = 0;
+            filteredInvoices.forEach(invoice => {
+                // Add the number of products in each invoice to the total count
+                totalCount += invoice.products.length;
+            });
+            // Update the state with the new count
+            // setProductCount(totalCount);
+        }
+    }, [invoices, startDate, endDate]);
 
     const generateYearlyChartData = (filteredInvoices) => {
         const monthlyTotalAmounts = new Array(12).fill(0);
@@ -160,6 +214,12 @@ const HomeScreen = () => {
                         </div>
                     </div>
                 </div>
+                <div className="card mb-4 shadow-sm">
+                    <div className="card-body">
+                        <h5 className="card-title">Product Count</h5>
+                            <p className="card-text">{productCount}</p>
+                </div>
+            </div>
                 <div className="col-md-6">
                     <div className="card mb-4 shadow-sm">
                         <div className="card-body">
