@@ -74,8 +74,8 @@ const InventoryScreen = () => {
 
             const filteredUniquePurchases = Array.from(purchasesMap.values());
 
-            const reversedLabels = filteredUniquePurchases.map(purchase => new Date(purchase.date).toLocaleDateString()).reverse();
-            const reversedData = filteredUniquePurchases.map(purchase => purchase.effectivePricePerUnit).reverse();
+            const reversedLabels = filteredUniquePurchases.map(purchase => new Date(purchase.date).toLocaleDateString());
+            const reversedData = filteredUniquePurchases.map(purchase => purchase.effectivePricePerUnit);
 
             const data = {
                 labels: reversedLabels,
