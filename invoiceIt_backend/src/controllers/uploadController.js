@@ -1,13 +1,13 @@
 const uploadService = require('../services/uploadService');
 
-exports.uploadPdf = async (req, res) => {
+exports.uploadPdf = async (req, res, next) => {
   try {
     const filePath = req.file.path;
+    const user_email = JSON.parse(req.body.user).email;
     const extractedData = await uploadService.processPdf(filePath);
-    await uploadService.updateDatabase(extractedData);
-    res.status(200).send('File uploaded and processed successfully');
+    const invoice = await uploadService.updateDatabase(extractedData, user_email);
+    res.status(invoice.status).json(invoice.body);
   } catch (error) {
-    console.error('Error processing file:', error);
-    res.status(500).send('Error processing file');
+    next(error);
   }
 };

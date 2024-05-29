@@ -1,4 +1,5 @@
 import base64
+import os
 from io import BytesIO
 from pdf2image import convert_from_path
 import sys
@@ -23,6 +24,8 @@ def pdf_to_image_base64(pdf_path, dpi=300):
 
         # Read the buffer and encode it to base64
         image_base64 = base64.b64encode(buffer.read()).decode('utf-8')
+
+        os.remove(pdf_path)
 
         return image_base64
     else:
