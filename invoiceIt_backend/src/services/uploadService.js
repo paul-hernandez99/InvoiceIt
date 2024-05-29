@@ -14,6 +14,7 @@ exports.processPdf = async (filePath) => {
         const response = await callOpenAIWithBase64Image(base64Image);
         if (response) {
           const messageContent = response.choices[0].message.content;
+          console.log(messageContent);
           return JSON.parse(messageContent);
 
         } else {
@@ -44,7 +45,7 @@ function parseDate(dateStr) {
 }
 
 exports.updateDatabase = async (extractedData, user_email) => {
-
+  
   const invoice_date = extractedData.invoice_date;
   const items = extractedData.items;
   let total_amount = parseFloat(extractedData.total_amount);
@@ -68,11 +69,11 @@ exports.updateDatabase = async (extractedData, user_email) => {
       let quantity = parseFloat(items[i].quantity);
       let discount = parseFloat(items[i].discount);
 
-      if (price_per_unit == NaN) {
+      if (price_per_unit == NaN || price_per_unit == 'NaN') {
         price_per_unit = 0;
-      } else if (quantity == NaN) {
+      } else if (quantity == NaN || quantity == 'NaN') {
         quantity = 0;
-      } else if (discount == NaN) {
+      } else if (discount == NaN || discount == 'NaN') {
         discount = 0;
       }
     
@@ -80,7 +81,7 @@ exports.updateDatabase = async (extractedData, user_email) => {
 
     }
 
-    return await invoiceService.createInvoice(user_email, products, total_amount, invoice_date);
+    return await invoiceService.createInvoice(user_email, products, total_amount, invoice_date_parsed);
   } catch (error) {
     console.log(error.message);
   }
@@ -128,7 +129,7 @@ async function callOpenAIWithBase64Image(imageBase64) {
         content: [
           {
             type: 'text',
-            text: 'Extract the code, item name, price per unit, quantity and discount of the items in the invoice, and the date and the total amount of the invoice, return it in a json format. Only return the json, do not return any other text. You have to use the following keys for the json: {invoice_date: , total_amount: ,items: [{code: ,item_name: ,price_per_unit: ,quantity: ,discount: ,import: },...]}'
+            text: 'Extract the code, item name, price per unit, quantity and discount of the items in the invoice, and the date and the total amount of the invoice, return it in a json format. Only return the json, do not return any other text. You have to use the following keys for the json: {invoice_date: , total_amount: ,items: [{code: ,item_name: ,price_per_unit: ,quantity: ,discount: ,import: },...]} invoice_date must follow the following format: (dd/mm/yy). If discount is not a number return 0'
           },
           {
             type: 'image_url',
